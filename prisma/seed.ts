@@ -3,12 +3,16 @@ import { prisma } from "../src/lib/prisma";
 async function main() {
   console.log("🔧 Seeding ElectroBase database...");
 
-  // Clear existing data
-  await prisma.pinConfiguration.deleteMany();
-  await prisma.specification.deleteMany();
-  await prisma.component.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.footprint.deleteMany();
+  // Clear existing data safely
+  try {
+    await prisma.pinConfiguration.deleteMany();
+    await prisma.specification.deleteMany();
+    await prisma.component.deleteMany();
+    await prisma.category.deleteMany();
+    await prisma.footprint.deleteMany();
+  } catch (e) {
+    console.log("⚠️ Tables don't exist yet, proceeding to create...");
+  }
 
   // ── Categories ──
   const categories = await Promise.all([
