@@ -17,6 +17,7 @@ interface Component {
   footprint: string | null;
   tags: string;
   pinCount: number | null;
+  imageUrl?: string | null;
 }
 
 export default function ComponentsPage() {

@@ -15,7 +15,7 @@ const developers = [
     role: "Developer & Designer",
     description: "Frontend developer and UI/UX designer responsible for the visual design, component library, and user experience.",
     links: [
-      { href: "#", icon: ExternalLink, label: "Portfolio" },
+      { href: "https://selvaux.in", icon: ExternalLink, label: "Portfolio" },
       { href: "#", icon: Mail, label: "Email" },
     ],
   },

@@ -7,6 +7,7 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { CATEGORY_COLORS, CATEGORY_ICONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getSchematicSvg } from "@/lib/schematic-svgs";
 
 interface ComponentCardProps {
   id: string;
@@ -18,6 +19,7 @@ interface ComponentCardProps {
   footprint: string | null;
   tags: string;
   pinCount: number | null;
+  imageUrl?: string | null;
 }
 
 export function ComponentCard({
@@ -30,6 +32,7 @@ export function ComponentCard({
   footprint,
   tags,
   pinCount,
+  imageUrl,
 }: ComponentCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [favorite, setFavorite] = useState(isFavorite(id));
@@ -82,7 +85,11 @@ export function ComponentCard({
       {/* Component Schematic Preview Image Area */}
       <div className="relative h-40 w-full bg-slate-950/40 dark:bg-slate-950/80 border-b border-border/20 flex items-center justify-center p-6 overflow-hidden">
         <div className="absolute inset-0 bg-radial-gradient from-transparent to-background/50 pointer-events-none" />
-        {getSvgPlaceholder()}
+        {imageUrl ? (
+          <img src={imageUrl} alt={name} className="w-full h-full object-contain mix-blend-lighten opacity-85 group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          getSchematicSvg(category, name)
+        )}
         <span className="absolute bottom-2 left-2 text-[10px] uppercase font-mono tracking-widest text-muted-foreground/60">
           {packageType || footprint || "Standard Package"}
         </span>

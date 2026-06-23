@@ -8,6 +8,8 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { DetailSkeleton } from "@/components/loading-skeleton";
 import { CATEGORY_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { getSchematicSvg } from "@/lib/schematic-svgs";
+import { PinoutVisualizer } from "@/components/pinout-visualizer";
 
 interface Pin {
   id: string;
@@ -43,7 +45,10 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
   const { id } = use(params);
   const [component, setComponent] = useState<ComponentDetail | null>(null);
   const [related, setRelated] = useState<ComponentDetail[]>([]);
+  const [equivalents, setEquivalents] = useState<ComponentDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hoveredPin, setHoveredPin] = useState<number | null>(null);
+  const [showPdf, setShowPdf] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -58,6 +63,14 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
         const relData = await relRes.json();
         const filtered = (relData.components || []).filter((c: any) => c.id !== data.id).slice(0, 6);
         setRelated(filtered);
+
+        // Fetch equivalents (matching category and pinCount)
+        if (data.pinCount) {
+          const eqRes = await fetch(`/api/components?category=${encodeURIComponent(data.category)}&limit=25`);
+          const eqData = await eqRes.json();
+          const equivs = (eqData.components || []).filter((c: any) => c.id !== data.id && c.pinCount === data.pinCount).slice(0, 6);
+          setEquivalents(equivs);
+        }
       } catch (error) {
         console.error("Failed to load details", error);
       } finally {
@@ -93,14 +106,11 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
       {/* Main Intro Header Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 h-64 lg:h-auto min-h-[250px] bg-slate-950/40 dark:bg-slate-950/80 rounded-2xl glass border border-border/40 flex items-center justify-center p-8 relative overflow-hidden group">
-          <svg className="w-32 h-32 text-cyan-500/25 group-hover:scale-105 transition-transform duration-500" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="10" width="80" height="80" rx="10" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
-            <circle cx="50" cy="50" r="20" stroke="currentColor" strokeWidth="2" />
-            <line x1="50" y1="10" x2="50" y2="30" stroke="currentColor" strokeWidth="2" />
-            <line x1="50" y1="70" x2="50" y2="90" stroke="currentColor" strokeWidth="2" />
-            <line x1="10" y1="50" x2="30" y2="50" stroke="currentColor" strokeWidth="2" />
-            <line x1="70" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="2" />
-          </svg>
+          {component.imageUrl ? (
+            <img src={component.imageUrl} alt={component.name} className="w-full h-full object-contain max-h-[200px] mix-blend-lighten opacity-90 group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            getSchematicSvg(component.category, component.name)
+          )}
         </div>
 
         <div className="lg:col-span-2 flex flex-col justify-between gap-6">
@@ -137,21 +147,48 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
 
           <div className="flex flex-wrap gap-3">
             {component.datasheetUrl && (
-              <a
-                href={component.datasheetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-mono text-xs transition-colors"
-              >
-                <Download size={14} />
-                <span>Datasheet PDF</span>
-                <ExternalLink size={12} className="opacity-80" />
-              </a>
+              <>
+                <a
+                  href={component.datasheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-mono text-xs transition-colors"
+                >
+                  <Download size={14} />
+                  <span>Datasheet PDF</span>
+                  <ExternalLink size={12} className="opacity-80" />
+                </a>
+                <button
+                  onClick={() => setShowPdf(!showPdf)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-500/30 hover:bg-cyan-500/10 text-cyan-400 font-mono text-xs transition-colors"
+                >
+                  <span>{showPdf ? "Close Inline Viewer" : "Embedded Viewer"}</span>
+                </button>
+              </>
             )}
             <FavoriteButton id={component.id} name={component.name} />
           </div>
         </div>
       </section>
+
+      {/* Collapsible PDF Viewer Inline */}
+      {component.datasheetUrl && showPdf && (
+        <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center justify-between border-b border-border/40 pb-2">
+            <h2 className="text-lg font-bold tracking-tight text-foreground">Datasheet Document Viewer</h2>
+            <button onClick={() => setShowPdf(false)} className="text-xs text-rose-400 hover:text-rose-300 font-mono">
+              Close Preview
+            </button>
+          </div>
+          <div className="w-full h-[550px] rounded-xl border border-border/40 overflow-hidden glass">
+            <iframe
+              src={`https://docs.google.com/gview?url=${encodeURIComponent(component.datasheetUrl)}&embedded=true`}
+              className="w-full h-full border-none"
+              title={`${component.name} Datasheet Preview`}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Specifications and Pinout Layout with a Sidebar */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
@@ -205,7 +242,15 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
                 <tbody>
                   {component.pins.length > 0 ? (
                     component.pins.map((pin) => (
-                      <tr key={pin.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10">
+                      <tr 
+                        key={pin.id} 
+                        className={cn(
+                          "border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors",
+                          hoveredPin === pin.pinNumber && "bg-cyan-500/10 text-cyan-400"
+                        )}
+                        onMouseEnter={() => setHoveredPin(pin.pinNumber)}
+                        onMouseLeave={() => setHoveredPin(null)}
+                      >
                         <td className="p-2.5 text-center font-bold font-mono text-xs text-cyan-400">{pin.pinNumber}</td>
                         <td className="p-2.5 font-bold font-mono text-xs text-foreground">{pin.pinName}</td>
                         <td className="p-2.5 text-muted-foreground text-xs">{pin.description}</td>
@@ -224,7 +269,7 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        {/* Sidebar Info Card */}
+        {/* Sidebar Info Card & Interactive Visualizer */}
         <div className="lg:col-span-1 space-y-6">
           <div className="p-6 rounded-2xl border border-border/40 glass space-y-4">
             <h3 className="text-sm font-bold font-mono text-cyan-400 tracking-wider uppercase">Reference Quick-Info</h3>
@@ -251,8 +296,42 @@ export default function ComponentDetailPage({ params }: { params: Promise<{ id: 
               </div>
             </div>
           </div>
+
+          {/* Pinout Visualizer */}
+          {component.pins.length > 0 && (
+            <PinoutVisualizer
+              pins={component.pins}
+              pinCount={component.pinCount}
+              footprint={component.footprint}
+              hoveredPin={hoveredPin}
+              onHoverPin={setHoveredPin}
+            />
+          )}
         </div>
       </section>
+
+      {/* Equivalents / Cross-References Section */}
+      {equivalents.length > 0 && (
+        <section className="space-y-4 pt-8 border-t border-border/20">
+          <h2 className="text-xl font-bold tracking-tight">Suggested Equivalents (Cross-Reference)</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {equivalents.map((comp) => (
+              <Link
+                key={comp.id}
+                href={`/components/${comp.id}`}
+                className="p-4 rounded-xl border border-border/40 glass hover:border-cyan-500/30 transition-all text-sm block space-y-2"
+              >
+                <span className="text-[10px] font-mono text-cyan-400">{comp.manufacturer}</span>
+                <h3 className="font-semibold text-foreground truncate group-hover:text-cyan-400">{comp.name}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2">{comp.description}</p>
+                <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/20 font-mono inline-block">
+                  {comp.pinCount} Pins
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Related Components Section */}
       {related.length > 0 && (
