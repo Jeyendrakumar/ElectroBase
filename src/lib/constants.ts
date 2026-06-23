@@ -87,5 +87,6 @@ export const NAV_LINKS = [
   { label: "Footprints", href: "/footprints" },
   { label: "Favorites", href: "/favorites" },
   { label: "Calculators", href: "/calculators" },
+  { label: "Simulator", href: "/simulator" },
   { label: "About", href: "/about" },
 ];
