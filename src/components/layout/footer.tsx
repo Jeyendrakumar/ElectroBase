@@ -22,6 +22,9 @@ export function Footer() {
           <Link href="/footprints" className="hover:text-cyan-400 transition-colors">
             Footprints
           </Link>
+          <Link href="/about" className="hover:text-cyan-400 transition-colors">
+            About
+          </Link>
           <Link href="/admin" className="hover:text-cyan-400 transition-colors">
             Admin Console
           </Link>
