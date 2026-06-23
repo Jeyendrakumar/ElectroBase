@@ -51,15 +51,26 @@ A full suite of electronics calculators integrated into the main navigation:
 * Covers **16 categories** (e.g., Op-amps, Inductors, Resistors, Capacitors, LEDs, Diodes, Crystals, Antennas, Logic Gates, etc.).
 * Symbols automatically scale and fit the dark-mode aesthetic seamlessly.
 
-### 4. Embedded PDF Datasheet Viewer
+### 4. Interactive Circuit Simulation Sandbox
+A dynamic, client-side schematic capture and electrical solver workspace:
+* **Draggable Component Grid**: Spawn DC Batteries, Resistors, LEDs, Switches, Push-Buttons, Logic Gates (NOT, AND, OR), NE555 Timers, and Ground references. Drag components to auto-align and snap to a 20px grid layout.
+* **Pin-to-Pin Wire Drawing**: Click component terminals to connect them. Connections are represented as SVG paths with neon colors reflecting logical levels (green for high voltage, blue for ground, red for short circuits).
+* **Live Electron Flow Animations**: Flow indicators move along active closed circuits in real time, with speeds reflecting loop dynamics.
+* **Component Inspectors & Overload Protection**:
+  * Resistors render dynamic color bands based on resistance values set via slider.
+  * Toggling DC batteries changes system voltage on the fly.
+  * LEDs glow when forward-biased, but *explode* and display a blown animation if connected directly to >3.3V without resistance!
+* **Template Presets**: Pre-loaded templates like **9V LED loop**, **Logic Gates OR/AND demo**, and **NE555 Astable Blinker** load instantly to demonstrate operational loops.
+
+### 5. Embedded PDF Datasheet Viewer
 * Load and preview official datasheets inside the application!
 * Features an expandable/collapsible toggle ("Embedded Viewer") that loads the PDF in-page via standard embedding, enabling side-by-side spec comparison without opening browser tabs.
 
-### 5. Equivalents & Cross-Reference Engine
+### 6. Equivalents & Cross-Reference Engine
 * Automatically lists potential pin-compatible alternative parts.
 * Suggestions are queried dynamically matching the same product category and having the exact same pin count.
 
-### 6. Local Favorites System
+### 7. Local Favorites System
 * Bookmark your most-used components with a single click.
 * Bookmarks are saved directly in local browser storage for instant retrieval.
 
@@ -82,6 +93,7 @@ ElectroBase/
     │   ├── about/        # About & Developer details page
     │   ├── admin/        # Admin panel for CRUD operations
     │   ├── calculators/  # Interactive calculators page
+    │   ├── simulator/    # Circuit simulation workspace page
     │   └── components/   # Catalog explorer, footprint view, & detail views
     ├── components/
     │   ├── component-card.tsx  # Interactive catalog card with SVG fallbacks
