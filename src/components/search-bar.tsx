@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, X, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,14 +9,52 @@ interface SearchBarProps {
   categories: string[];
   footprints: string[];
   manufacturers: string[];
+  initialQuery?: string;
+  initialCategory?: string;
+  initialFootprint?: string;
+  initialManufacturer?: string;
 }
 
-export function SearchBar({ onSearch, categories, footprints, manufacturers }: SearchBarProps) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [footprint, setFootprint] = useState("");
-  const [manufacturer, setManufacturer] = useState("");
+export function SearchBar({
+  onSearch,
+  categories,
+  footprints,
+  manufacturers,
+  initialQuery = "",
+  initialCategory = "",
+  initialFootprint = "",
+  initialManufacturer = ""
+}: SearchBarProps) {
+  const [query, setQuery] = useState(initialQuery);
+  const [category, setCategory] = useState(initialCategory);
+  const [footprint, setFootprint] = useState(initialFootprint);
+  const [manufacturer, setManufacturer] = useState(initialManufacturer);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    setCategory(initialCategory);
+    if (initialCategory) {
+      setShowFilters(true);
+    }
+  }, [initialCategory]);
+
+  useEffect(() => {
+    setFootprint(initialFootprint);
+    if (initialFootprint) {
+      setShowFilters(true);
+    }
+  }, [initialFootprint]);
+
+  useEffect(() => {
+    setManufacturer(initialManufacturer);
+    if (initialManufacturer) {
+      setShowFilters(true);
+    }
+  }, [initialManufacturer]);
 
   const handleSearchChange = (val: string) => {
     setQuery(val);

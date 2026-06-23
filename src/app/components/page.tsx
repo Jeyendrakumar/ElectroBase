@@ -62,7 +62,22 @@ export default function ComponentsPage() {
   };
 
   useEffect(() => {
-    fetchComponents();
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const catParam = params.get("category") || "";
+      const fpParam = params.get("footprint") || "";
+      const mfgParam = params.get("manufacturer") || "";
+      const qParam = params.get("q") || "";
+
+      setQuery(qParam);
+      setSelectedCategory(catParam);
+      setSelectedFootprint(fpParam);
+      setSelectedManufacturer(mfgParam);
+
+      fetchComponents(qParam, catParam, fpParam, mfgParam, 1);
+    } else {
+      fetchComponents();
+    }
   }, []);
 
   const handleSearch = (
@@ -74,6 +89,18 @@ export default function ComponentsPage() {
     setSelectedFootprint(filters.footprint);
     setSelectedManufacturer(filters.manufacturer);
     setPage(1);
+    
+    // Update the URL query params dynamically to reflect the current search filters!
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams();
+      if (val) params.set("q", val);
+      if (filters.category) params.set("category", filters.category);
+      if (filters.footprint) params.set("footprint", filters.footprint);
+      if (filters.manufacturer) params.set("manufacturer", filters.manufacturer);
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState(null, "", newUrl);
+    }
+
     fetchComponents(val, filters.category, filters.footprint, filters.manufacturer, 1);
   };
 
@@ -98,6 +125,10 @@ export default function ComponentsPage() {
         categories={categories}
         footprints={footprints}
         manufacturers={manufacturers}
+        initialQuery={query}
+        initialCategory={selectedCategory}
+        initialFootprint={selectedFootprint}
+        initialManufacturer={selectedManufacturer}
       />
 
       {loading ? (
