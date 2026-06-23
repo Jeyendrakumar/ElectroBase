@@ -1003,6 +1003,14 @@ export default function SimulatorPage() {
         .animate-flow-dash {
           animation: flowAnim 0.6s linear infinite;
         }
+        @keyframes pinGlow {
+          0% { opacity: 0.3; stroke-width: 1.5px; }
+          50% { opacity: 0.9; stroke-width: 3.5px; }
+          100% { opacity: 0.3; stroke-width: 1.5px; }
+        }
+        .animate-pin-glow {
+          animation: pinGlow 1.4s ease-in-out infinite;
+        }
       `}</style>
 
       {/* Title Header */}
@@ -1228,7 +1236,7 @@ export default function SimulatorPage() {
                   }
                 }
 
-                const pathData = getWireStraightPath(start.x, start.y, end.x, end.y);
+                const pathData = getWireCurvePath(start.x, start.y, end.x, end.y);
 
                 return (
                   <g key={wire.id} className="group">
@@ -1273,14 +1281,13 @@ export default function SimulatorPage() {
               {wireStart && (
                 (() => {
                   const startCoords = getPinCanvasCoords(wireStart.componentId, wireStart.pinId);
+                  const pathData = getWireCurvePath(startCoords.x, startCoords.y, mousePos.x, mousePos.y);
                   return (
-                    <line
-                      x1={startCoords.x}
-                      y1={startCoords.y}
-                      x2={mousePos.x}
-                      y2={mousePos.y}
+                    <path
+                      d={pathData}
                       stroke="#06b6d4"
                       strokeWidth="2.5"
+                      fill="none"
                       strokeDasharray="4, 4"
                     />
                   );
@@ -1496,21 +1503,46 @@ export default function SimulatorPage() {
                     {/* RENDERING PIN NODES */}
                     {schema.map((pin) => {
                       const isConnectingStart = wireStart && wireStart.componentId === comp.id && wireStart.pinId === pin.pinId;
+                      const isTargetCandidate = wireStart && wireStart.componentId !== comp.id;
+                      
                       return (
-                        <circle
-                          key={pin.pinId}
-                          cx={pin.x}
-                          cy={pin.y}
-                          r="5.5"
-                          fill={isConnectingStart ? "#22d3ee" : "#262626"}
-                          stroke={isConnectingStart ? "#22d3ee" : borderStroke}
-                          strokeWidth="2"
-                          className="hover:scale-130 transition-transform cursor-pointer"
-                          onClick={(e) => handlePinClick(e, comp.id, pin.pinId)}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        >
-                          <title>{pin.label}</title>
-                        </circle>
+                        <g key={pin.pinId}>
+                          {/* Pulsing indicator for candidate connections */}
+                          {isTargetCandidate && (
+                            <circle
+                              cx={pin.x}
+                              cy={pin.y}
+                              r="9.5"
+                              fill="transparent"
+                              stroke="#22d3ee"
+                              className="pointer-events-none animate-pin-glow"
+                            />
+                          )}
+                          
+                          {/* Visual pin node */}
+                          <circle
+                            cx={pin.x}
+                            cy={pin.y}
+                            r="5.5"
+                            fill={isConnectingStart ? "#22d3ee" : "#262626"}
+                            stroke={isConnectingStart ? "#22d3ee" : borderStroke}
+                            strokeWidth="2"
+                            className="pointer-events-none"
+                          />
+
+                          {/* Large invisible hit target circle for easy connections */}
+                          <circle
+                            cx={pin.x}
+                            cy={pin.y}
+                            r="15"
+                            fill="transparent"
+                            className="cursor-pointer"
+                            onClick={(e) => handlePinClick(e, comp.id, pin.pinId)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <title>{pin.label}</title>
+                          </circle>
+                        </g>
                       );
                     })}
                   </g>
@@ -1810,6 +1842,9 @@ export default function SimulatorPage() {
   );
 }
 
-function getWireStraightPath(x1: number, y1: number, x2: number, y2: number) {
-  return `M ${x1} ${y1} L ${x2} ${y2}`;
+function getWireCurvePath(x1: number, y1: number, x2: number, y2: number) {
+  const dx = Math.abs(x1 - x2);
+  const dy = Math.abs(y1 - y2);
+  const offset = Math.max(dx * 0.45, dy * 0.25, 45);
+  return `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`;
 }
