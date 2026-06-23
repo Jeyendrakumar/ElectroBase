@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/search-bar";
 import { ComponentCard } from "@/components/component-card";
 import { GridSkeleton } from "@/components/loading-skeleton";
@@ -20,26 +21,37 @@ interface Component {
   imageUrl?: string | null;
 }
 
-export default function ComponentsPage() {
+function ComponentsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get search params
+  const qParam = searchParams.get("q") || "";
+  const catParam = searchParams.get("category") || "";
+  const fpParam = searchParams.get("footprint") || "";
+  const mfgParam = searchParams.get("manufacturer") || "";
+  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+
   const [components, setComponents] = useState<Component[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [footprints, setFootprints] = useState<string[]>([]);
   const [manufacturers, setManufacturers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [query, setQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedFootprint, setSelectedFootprint] = useState("");
-  const [selectedManufacturer, setSelectedManufacturer] = useState("");
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Sync state variables from URL parameters
+  const [query, setQuery] = useState(qParam);
+  const [selectedCategory, setSelectedCategory] = useState(catParam);
+  const [selectedFootprint, setSelectedFootprint] = useState(fpParam);
+  const [selectedManufacturer, setSelectedManufacturer] = useState(mfgParam);
+  const [page, setPage] = useState(pageParam);
+
   const fetchComponents = async (
-    q: string = query,
-    cat: string = selectedCategory,
-    fp: string = selectedFootprint,
-    mfg: string = selectedManufacturer,
-    pageNum: number = page
+    q: string,
+    cat: string,
+    fp: string,
+    mfg: string,
+    pageNum: number
   ) => {
     setLoading(true);
     try {
@@ -61,52 +73,34 @@ export default function ComponentsPage() {
     }
   };
 
+  // Reactively fetch components and update local states when search parameters change (supports browser navigation/transitions)
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const catParam = params.get("category") || "";
-      const fpParam = params.get("footprint") || "";
-      const mfgParam = params.get("manufacturer") || "";
-      const qParam = params.get("q") || "";
+    setQuery(qParam);
+    setSelectedCategory(catParam);
+    setSelectedFootprint(fpParam);
+    setSelectedManufacturer(mfgParam);
+    setPage(pageParam);
 
-      setQuery(qParam);
-      setSelectedCategory(catParam);
-      setSelectedFootprint(fpParam);
-      setSelectedManufacturer(mfgParam);
-
-      fetchComponents(qParam, catParam, fpParam, mfgParam, 1);
-    } else {
-      fetchComponents();
-    }
-  }, []);
+    fetchComponents(qParam, catParam, fpParam, mfgParam, pageParam);
+  }, [qParam, catParam, fpParam, mfgParam, pageParam]);
 
   const handleSearch = (
     val: string,
     filters: { category: string; footprint: string; manufacturer: string }
   ) => {
-    setQuery(val);
-    setSelectedCategory(filters.category);
-    setSelectedFootprint(filters.footprint);
-    setSelectedManufacturer(filters.manufacturer);
-    setPage(1);
-    
-    // Update the URL query params dynamically to reflect the current search filters!
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams();
-      if (val) params.set("q", val);
-      if (filters.category) params.set("category", filters.category);
-      if (filters.footprint) params.set("footprint", filters.footprint);
-      if (filters.manufacturer) params.set("manufacturer", filters.manufacturer);
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState(null, "", newUrl);
-    }
-
-    fetchComponents(val, filters.category, filters.footprint, filters.manufacturer, 1);
+    const params = new URLSearchParams();
+    if (val) params.set("q", val);
+    if (filters.category) params.set("category", filters.category);
+    if (filters.footprint) params.set("footprint", filters.footprint);
+    if (filters.manufacturer) params.set("manufacturer", filters.manufacturer);
+    params.set("page", "1");
+    router.push(`/components?${params.toString()}`);
   };
 
   const handlePageChange = (pageNum: number) => {
-    setPage(pageNum);
-    fetchComponents(query, selectedCategory, selectedFootprint, selectedManufacturer, pageNum);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(pageNum));
+    router.push(`/components?${params.toString()}`);
   };
 
   return (
@@ -152,5 +146,13 @@ export default function ComponentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ComponentsPage() {
+  return (
+    <Suspense fallback={<GridSkeleton count={8} />}>
+      <ComponentsPageContent />
+    </Suspense>
   );
 }
