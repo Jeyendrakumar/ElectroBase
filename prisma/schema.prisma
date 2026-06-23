@@ -1,0 +1,76 @@
+// ElectroBase - Prisma Schema
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider     = "sqlite"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Component {
+  id           String             @id @default(cuid())
+  name         String
+  category     String
+  manufacturer String
+  description  String
+  datasheetUrl String?
+  imageUrl     String?
+  footprint    String?
+  packageType  String?
+  pinCount     Int?
+  tags         String             @default("") // comma-separated
+  isFeatured   Boolean            @default(false)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  pins          PinConfiguration[]
+  specifications Specification[]
+
+  @@index([category])
+  @@index([manufacturer])
+  @@index([name])
+}
+
+model PinConfiguration {
+  id          String    @id @default(cuid())
+  componentId String
+  pinNumber   Int
+  pinName     String
+  description String
+
+  component   Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@index([componentId])
+}
+
+model Specification {
+  id          String    @id @default(cuid())
+  componentId String
+  parameter   String
+  value       String
+  unit        String?
+
+  component   Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@index([componentId])
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  icon        String?
+}
+
+model Footprint {
+  id                String  @id @default(cuid())
+  name              String  @unique
+  description       String?
+  dimensions        String?
+  imageUrl          String?
+  recommendedLayout String?
+}
