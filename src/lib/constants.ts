@@ -10,11 +10,17 @@ import {
   Radio,
   type LucideIcon,
   Microchip,
+  Cog,
+  BatteryCharging,
+  Gauge,
+  Wifi,
+  Monitor,
+  CircleDot,
 } from "lucide-react";
 
 export const APP_NAME = "ElectroBase";
 export const APP_DESCRIPTION =
-  "A comprehensive electronics component database for engineers, hobbyists, and makers.";
+  "The all-in-one electronics component reference library for engineers, makers, and hardware professionals. Datasheets, pinouts, specs & footprints.";
 export const ITEMS_PER_PAGE = 12;
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -28,6 +34,12 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Connector: Plug,
   Relay: ToggleRight,
   "Crystal Oscillator": Radio,
+  "Motor Driver": Cog,
+  "Power Module": BatteryCharging,
+  "Voltage Reference": Gauge,
+  "Communication Module": Wifi,
+  "Display Module": Monitor,
+  Inductor: CircleDot,
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
@@ -41,6 +53,12 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Connector: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   Relay: "bg-pink-500/20 text-pink-400 border-pink-500/30",
   "Crystal Oscillator": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  "Motor Driver": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+  "Power Module": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  "Voltage Reference": "bg-sky-500/20 text-sky-400 border-sky-500/30",
+  "Communication Module": "bg-green-500/20 text-green-400 border-green-500/30",
+  "Display Module": "bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30",
+  Inductor: "bg-lime-500/20 text-lime-400 border-lime-500/30",
 };
 
 export const CATEGORY_GRADIENT: Record<string, string> = {
@@ -54,6 +72,12 @@ export const CATEGORY_GRADIENT: Record<string, string> = {
   Connector: "from-orange-500 to-amber-500",
   Relay: "from-pink-500 to-rose-500",
   "Crystal Oscillator": "from-indigo-500 to-purple-500",
+  "Motor Driver": "from-violet-500 to-purple-500",
+  "Power Module": "from-yellow-500 to-orange-500",
+  "Voltage Reference": "from-sky-500 to-cyan-500",
+  "Communication Module": "from-green-500 to-emerald-500",
+  "Display Module": "from-fuchsia-500 to-pink-500",
+  Inductor: "from-lime-500 to-green-500",
 };
 
 export const NAV_LINKS = [

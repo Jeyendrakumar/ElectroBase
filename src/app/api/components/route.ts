@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get("q") || "";
     const category = searchParams.get("category") || "";
     const footprint = searchParams.get("footprint") || "";
+    const manufacturer = searchParams.get("manufacturer") || "";
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || String(ITEMS_PER_PAGE), 10);
     const skip = (page - 1) * limit;
@@ -31,6 +32,10 @@ export async function GET(req: NextRequest) {
       where.footprint = footprint;
     }
 
+    if (manufacturer) {
+      where.manufacturer = manufacturer;
+    }
+
     const [components, total] = await Promise.all([
       prisma.component.findMany({
         where,
@@ -42,9 +47,13 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Unique manufacturers, categories, footprints for selection dropdowns
-    const [allCategories, allFootprints] = await Promise.all([
+    const [allCategories, allFootprints, distinctManufacturers] = await Promise.all([
       prisma.category.findMany({ select: { name: true } }),
       prisma.footprint.findMany({ select: { name: true } }),
+      prisma.component.findMany({
+        select: { manufacturer: true },
+        distinct: ["manufacturer"],
+      }),
     ]);
 
     return NextResponse.json({
@@ -54,6 +63,7 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil(total / limit),
       categories: allCategories.map((c) => c.name),
       footprints: allFootprints.map((f) => f.name),
+      manufacturers: distinctManufacturers.map((m) => m.manufacturer).sort(),
     });
   } catch (error: any) {
     console.error("Components query API failed", error);

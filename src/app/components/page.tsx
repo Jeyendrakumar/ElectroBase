@@ -23,11 +23,13 @@ export default function ComponentsPage() {
   const [components, setComponents] = useState<Component[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [footprints, setFootprints] = useState<string[]>([]);
+  const [manufacturers, setManufacturers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedFootprint, setSelectedFootprint] = useState("");
+  const [selectedManufacturer, setSelectedManufacturer] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -35,13 +37,14 @@ export default function ComponentsPage() {
     q: string = query,
     cat: string = selectedCategory,
     fp: string = selectedFootprint,
+    mfg: string = selectedManufacturer,
     pageNum: number = page
   ) => {
     setLoading(true);
     try {
       const url = `/api/components?q=${encodeURIComponent(q)}&category=${encodeURIComponent(
         cat
-      )}&footprint=${encodeURIComponent(fp)}&page=${pageNum}`;
+      )}&footprint=${encodeURIComponent(fp)}&manufacturer=${encodeURIComponent(mfg)}&page=${pageNum}`;
       const res = await fetch(url);
       const data = await res.json();
 
@@ -49,6 +52,7 @@ export default function ComponentsPage() {
       setTotalPages(data.totalPages || 1);
       if (data.categories) setCategories(data.categories);
       if (data.footprints) setFootprints(data.footprints);
+      if (data.manufacturers) setManufacturers(data.manufacturers);
     } catch (error) {
       console.error("Failed to load components", error);
     } finally {
@@ -60,17 +64,21 @@ export default function ComponentsPage() {
     fetchComponents();
   }, []);
 
-  const handleSearch = (val: string, filters: { category: string; footprint: string }) => {
+  const handleSearch = (
+    val: string,
+    filters: { category: string; footprint: string; manufacturer: string }
+  ) => {
     setQuery(val);
     setSelectedCategory(filters.category);
     setSelectedFootprint(filters.footprint);
+    setSelectedManufacturer(filters.manufacturer);
     setPage(1);
-    fetchComponents(val, filters.category, filters.footprint, 1);
+    fetchComponents(val, filters.category, filters.footprint, filters.manufacturer, 1);
   };
 
   const handlePageChange = (pageNum: number) => {
     setPage(pageNum);
-    fetchComponents(query, selectedCategory, selectedFootprint, pageNum);
+    fetchComponents(query, selectedCategory, selectedFootprint, selectedManufacturer, pageNum);
   };
 
   return (
@@ -84,7 +92,12 @@ export default function ComponentsPage() {
         </p>
       </div>
 
-      <SearchBar onSearch={handleSearch} categories={categories} footprints={footprints} />
+      <SearchBar
+        onSearch={handleSearch}
+        categories={categories}
+        footprints={footprints}
+        manufacturers={manufacturers}
+      />
 
       {loading ? (
         <GridSkeleton count={8} />

@@ -5,37 +5,45 @@ import { Search, X, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
-  onSearch: (query: string, filters: { category: string; footprint: string }) => void;
+  onSearch: (query: string, filters: { category: string; footprint: string; manufacturer: string }) => void;
   categories: string[];
   footprints: string[];
+  manufacturers: string[];
 }
 
-export function SearchBar({ onSearch, categories, footprints }: SearchBarProps) {
+export function SearchBar({ onSearch, categories, footprints, manufacturers }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [footprint, setFootprint] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const handleSearchChange = (val: string) => {
     setQuery(val);
-    onSearch(val, { category, footprint });
+    onSearch(val, { category, footprint, manufacturer });
   };
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
-    onSearch(query, { category: val, footprint });
+    onSearch(query, { category: val, footprint, manufacturer });
   };
 
   const handleFootprintChange = (val: string) => {
     setFootprint(val);
-    onSearch(query, { category, footprint: val });
+    onSearch(query, { category, footprint: val, manufacturer });
+  };
+
+  const handleManufacturerChange = (val: string) => {
+    setManufacturer(val);
+    onSearch(query, { category, footprint, manufacturer: val });
   };
 
   const clearFilters = () => {
     setQuery("");
     setCategory("");
     setFootprint("");
-    onSearch("", { category: "", footprint: "" });
+    setManufacturer("");
+    onSearch("", { category: "", footprint: "", manufacturer: "" });
   };
 
   return (
@@ -73,7 +81,7 @@ export function SearchBar({ onSearch, categories, footprints }: SearchBarProps) 
       </div>
 
       {showFilters && (
-        <div className="p-4 rounded-xl border border-border/40 glass grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="p-4 rounded-xl border border-border/40 glass grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div>
             <label className="text-xs font-mono text-muted-foreground mb-1.5 block">Category</label>
             <select
@@ -106,8 +114,24 @@ export function SearchBar({ onSearch, categories, footprints }: SearchBarProps) 
             </select>
           </div>
 
-          {(category || footprint || query) && (
-            <div className="sm:col-span-2 flex justify-end">
+          <div>
+            <label className="text-xs font-mono text-muted-foreground mb-1.5 block">Manufacturer</label>
+            <select
+              value={manufacturer}
+              onChange={(e) => handleManufacturerChange(e.target.value)}
+              className="w-full py-2 px-3 rounded-md border border-border/40 bg-card/40 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-foreground"
+            >
+              <option value="" className="bg-slate-900 text-foreground">All Manufacturers</option>
+              {manufacturers.map((mfg) => (
+                <option key={mfg} value={mfg} className="bg-slate-900 text-foreground">
+                  {mfg}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(category || footprint || manufacturer || query) && (
+            <div className="sm:col-span-3 flex justify-end">
               <button
                 onClick={clearFilters}
                 className="text-xs font-mono text-rose-400 hover:text-rose-300 flex items-center gap-1.5"

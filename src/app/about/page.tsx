@@ -31,13 +31,11 @@ export default function AboutPage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">About This Project</h1>
         <p className="text-muted-foreground leading-relaxed">
-          ElectroBase is a comprehensive electronics component reference library built for engineers, hobbyists, and makers.
-          It provides an easy way to browse specifications, pin layouts, footprints, and datasheets for a wide range of
-          electronic components including ICs, microcontrollers, sensors, transistors, diodes, and passive components.
+          ElectroBase is the ultimate all-in-one reference library built for electronic and hardware engineers, designers, and hobbyists.
+          It serves as a comprehensive, centralized portal to find essential specifications, pinout configurations, footprint layouts, and datasheets for a vast catalog of components in one place.
         </p>
         <p className="text-muted-foreground leading-relaxed">
-          Built with Next.js and powered by Turso (serverless SQLite), ElectroBase delivers fast, reliable access to
-          component data from anywhere. The project is open-source and deployed on Vercel.
+          Whether you need details on logic ICs, microcontrollers, communication modules, motor drivers, display modules, or passive components, ElectroBase is designed to accelerate your hardware design flow.
         </p>
       </section>
 
