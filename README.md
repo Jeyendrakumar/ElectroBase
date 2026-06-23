@@ -1,15 +1,18 @@
 # ElectroBase
 
-A comprehensive electronics component reference library for makers and engineers. Browse, search, and explore specifications, pin layouts, footprints, and datasheets for a wide range of electronic components including ICs, microcontrollers, sensors, transistors, diodes, resistors, capacitors, and more.
+The ultimate all-in-one electronics and hardware component reference library for engineers, professional designers, and makers. Browse, search, and instantly access specifications, pin configurations, footprint dimensions, and datasheet downloads for a massive catalog of components in one place.
 
 ## Features
 
-- **Component Catalog** — Search and filter through a curated library of electronic components with detailed specifications
-- **Pin Configuration** — View pin diagrams and descriptions for each component
-- **Footprints** — Browse standard PCB footprints (DIP, SOIC, QFN, BGA, SOT, and more) with dimensions and layout recommendations
-- **Datasheet Links** — Quick access to manufacturer datasheets
-- **Favorites** — Save components to your personal favorites list (stored in browser)
-- **Admin Panel** — Add, edit, and manage components, categories, and footprints
+- **Component Catalog** — Look up detailed specifications, packages, and dimensions across **16 component categories** (ICs, microcontrollers, sensors, passive components, motor drivers, voltage references, display modules, etc.).
+- **Dynamic Stats Dashboard** — Home screen displays real-time breakdowns of components, total categories, direct datasheet downloads, and user favorites.
+- **Enhanced Search & Filtering** — Filter and narrow down parts quickly by **Category**, **Footprint**, and **Manufacturer** (Texas Instruments, Microchip, STMicroelectronics, Espressif, Bosch, etc.).
+- **Interactive Pin Configuration** — Clear pin numbers, names, and descriptions for all component connections.
+- **Interactive Detail Sidebar** — Quick reference sidebar details package type, category, manufacturer, footprint, and pin counts.
+- **Reference Footprints** — Browse standard PCB footprints (DIP, SOIC, QFN, BGA, SOT, etc.) with dimension info and recommended layout parameters.
+- **Clickable Search Tags** — Hashtags on component details link back to related search terms.
+- **Favorites** — Save components to your personal favorites list (saved locally in browser storage).
+- **Admin Panel** — Dedicated admin portal to create, modify, or delete parts and footprints.
 
 ## Tech Stack
 
@@ -33,12 +36,14 @@ A comprehensive electronics component reference library for makers and engineers
 # Install dependencies
 npm install
 
-# Generate Prisma client
-npx prisma generate
+# Setup env variables
+# Create a .env file with DATABASE_URL="file:./dev.db"
 
-# Push schema and seed the database
+# Sync schema and generate client
 npx prisma db push
-npx tsx prisma/seed.ts
+
+# Seed the database (Populates 16 categories, 11 footprints, and 81+ real components)
+npm run seed
 
 # Start dev server
 npm run dev
@@ -48,27 +53,17 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Environment Variables
 
-Copy `.env` and configure:
+Configure these variables in your `.env` or Vercel dashboard:
 
 | Variable | Description |
 |---|---|
-| `DATABASE_URL` | Local SQLite path (`file:./prisma/dev.db`) |
+| `DATABASE_URL` | Local SQLite path (`file:./dev.db`) |
 | `TURSO_DATABASE_URL` | Turso database URL (production) |
 | `TURSO_AUTH_TOKEN` | Turso authentication token (production) |
 | `ADMIN_PASSWORD` | Password for admin panel access |
-
-## Deployment
-
-This project is designed to deploy on Vercel with Turso as the production database.
-
-```bash
-# Set environment variables in Vercel dashboard:
-# - TURSO_DATABASE_URL
-# - TURSO_AUTH_TOKEN
-# - ADMIN_PASSWORD
-```
 
 ## Developers
 
 - **Jeyendrakumar** — Project Lead & Developer
 - **Selva.Ux** — Developer & Designer
+
